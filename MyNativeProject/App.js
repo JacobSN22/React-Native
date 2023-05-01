@@ -1,10 +1,10 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, TextInput, View, Image, path, FlatList } from 'react-native';
+import { useState } from 'react';
+import { Pressable, TextInput, FlatList, Image, StyleSheet, Text, View } from 'react-native';
 
 const arrData = [
-  { id: 1, title: 'Item 1'},
-  { id: 2, title: 'Item 2'},
-  { id: 3, title: 'Item 3'},
+  { id: 1, title: 'Item 1' },
+  { id: 2, title: 'Item 2' },
+  { id: 3, title: 'Item 3' }
 ]
 
 const ListItem = props => {
@@ -16,21 +16,56 @@ const ListItem = props => {
 }
 
 export default function App() {
+  const [ enteredTaskText, setEnteredTaskText ] = useState()
+  const [ taskList, setTaskList ] = useState([])
+
+  const taskTextHandler = enteredTaskText => {
+    setEnteredTaskText(enteredTaskText)
+  }
+
+  const addTaskHandler = () => {
+    setTaskList(curTasks => [
+      ...curTasks, 
+      { id: Math.random().toString(), title: enteredTaskText }
+    ])
+    // Nulstiller input tekst
+    setEnteredTaskText('')
+  }
+
+  // Handler til at slette task med
+  const deleteTaskHandler = id => {
+    // Sætter liste til sig selv uden id der skal slettes
+    setTaskList(taskList.filter(task => task.id !== id))
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headline}>TODOLIST</Text>          
+        <Text style={styles.headline}>ToDoList</Text>
         <Image source={require('./assets/hlogo.png')} style={styles.logo}></Image>
       </View>
       <View style={styles.main}>
-        <FlatList data={arrData} renderItem={itemData => {
-          return <ListItem title={itemData.item.title}></ListItem>
-        }}>
+        <View style={styles.formContainer}>
+          <TextInput
+            placeholder='Indtast opgave'
+            style={styles.textinput} 
+            onChangeText={taskTextHandler} 
+            value={enteredTaskText}
+          ></TextInput>
+          <Pressable style={styles.button} onPress={addTaskHandler}>
+            <Text style={styles.buttonText}>+</Text>
+          </Pressable>
 
+        </View>
+        <FlatList data={taskList} renderItem={itemData => {
+          return (
+            <Pressable onPress={e => deleteTaskHandler(itemData.item.id)}>
+              <ListItem title={itemData.item.title}></ListItem>
+            </Pressable>
+            )
+        }}>
         </FlatList>
       </View>
-      
-      <StatusBar style="auto" />
     </View>
   );
 }
@@ -80,6 +115,33 @@ const styles = StyleSheet.create({
   listitemtxt: {
     color: 'white',
     fontWeight: 'bold'
+  },
+  formContainer: {
+    flexDirection: 'row',
+    paddingBottom: 15,
+    marginBottom: 20,
+    borderBottomWidth: 1,
+    borderColor: 'black',
+    justifyContent: 'space-between'
+  },
+  textinput: {
+    borderWidth: 1,
+    borderColor: 'black',
+    borderRadius: 6,
+    width: '84%',
+    padding: 10
+  },
+  button: {
+    borderWidth: 1,
+    borderColor: 'black',
+    paddingHorizontal: 8,
+    borderRadius: 5,
+    backgroundColor: 'darkgoldenrod',
+    width: 50
+  },
+  buttonText: {
+    padding: 10,
+    fontSize: 20
   }
 
 });
